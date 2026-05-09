@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+defaults:
+  run:
+    working-directory: ./trackflow
+
 jobs:
   check:
     name: Lint & Type Check
@@ -19,6 +23,7 @@ jobs:
         with:
           node-version: 22
           cache: 'npm'
+          cache-dependency-path: ./trackflow/package-lock.json
 
       - run: npm ci
 
@@ -40,6 +45,7 @@ jobs:
         with:
           node-version: 22
           cache: 'npm'
+          cache-dependency-path: ./trackflow/package-lock.json
 
       - run: npm ci
 
@@ -50,7 +56,6 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: []
 
     steps:
       - uses: actions/checkout@v4
@@ -59,6 +64,7 @@ jobs:
         with:
           node-version: 22
           cache: 'npm'
+          cache-dependency-path: ./trackflow/package-lock.json
 
       - run: npm ci
 
