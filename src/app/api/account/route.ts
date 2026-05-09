@@ -45,6 +45,7 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (getServerClient() as any)
       .from('profiles')
       .update(validation.data)

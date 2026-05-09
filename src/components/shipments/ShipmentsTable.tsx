@@ -13,7 +13,7 @@ import {
 import { ArrowUpDown, Pencil, Trash2 } from "lucide-react";
 import type { Shipment, ShipmentStatus } from "@/types";
 import type { ShipmentInput } from "@/lib/validations";
-import { formatDate, cn } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import { StatusBadge } from "./StatusBadge";
 import { ShipmentForm } from "./ShipmentForm";
 import { Button } from "@/components/ui/button";

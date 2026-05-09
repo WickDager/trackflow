@@ -28,7 +28,6 @@ export default function ShipmentsPage() {
     shipments,
     loading,
     error,
-    totalCount,
     createShipment,
     updateShipment,
     deleteShipment,

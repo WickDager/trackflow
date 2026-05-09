@@ -25,6 +25,7 @@ export async function PATCH(
       );
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (getServerClient() as any)
       .from('shipments')
       .update(validation.data)

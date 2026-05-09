@@ -67,6 +67,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (getServerClient() as any)
       .from('shipments')
       .insert(validation.data)

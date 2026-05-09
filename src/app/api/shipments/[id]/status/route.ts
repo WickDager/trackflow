@@ -32,6 +32,7 @@ export async function PATCH(
 
     const { newStatus } = validation.data;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: shipment, error: fetchError } = await (getServerClient() as any)
       .from('shipments')
       .select('tracking_number, origin, destination, status')
@@ -54,6 +55,7 @@ export async function PATCH(
       );
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: updated, error: updateError } = await (getServerClient() as any)
       .from('shipments')
       .update({ status: newStatus, updated_at: new Date().toISOString() })
@@ -93,7 +95,7 @@ export async function PATCH(
       },
       error: null,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { data: null, error: 'Internal server error' },
       { status: 500 }

@@ -6,7 +6,6 @@ import {
   Package,
   Users,
   BarChart3,
-  Settings,
   LogOut,
   User,
 } from "lucide-react";

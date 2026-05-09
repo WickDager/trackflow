@@ -82,7 +82,7 @@ export class YooKassaProvider implements PaymentProviderInterface {
 
   handleWebhook(
     payload: string,
-    headers: Record<string, string>
+    _headers: Record<string, string>
   ): WebhookEvent | null {
     try {
       const event = JSON.parse(payload) as {

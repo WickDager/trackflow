@@ -17,12 +17,12 @@ export default function UsersPage() {
   const adminCount = users.filter((u) => u.role === "admin").length;
   const userCount = users.filter((u) => u.role === "user").length;
 
-  async function handleRoleChange(userId: string, newRole: Role): Promise<boolean> {
+  async function handleRoleChange(_userId: string, _newRole: Role): Promise<boolean> {
     await refetch();
     return true;
   }
 
-  async function handleRemove(userId: string): Promise<void> {
+  async function handleRemove(_userId: string): Promise<void> {
     await refetch();
   }
 

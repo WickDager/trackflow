@@ -11,7 +11,6 @@ export default function AccountPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [avatarBase64, setAvatarBase64] = useState<string>("");
 
   useEffect(() => {
     async function fetchProfile() {
@@ -88,7 +87,7 @@ export default function AccountPage() {
             currentAvatarUrl={profile?.avatar_url ?? null}
             fullName={profile?.full_name ?? ""}
             email=""
-            onAvatarChange={setAvatarBase64}
+            onAvatarChange={() => {}}
           />
         </div>
         <ProfileForm profile={profile} onSubmit={handleUpdateProfile} />

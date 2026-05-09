@@ -28,7 +28,6 @@ interface TopbarProps {
 
 export function Topbar({
   title,
-  role,
   user,
   onMenuClick,
   onSignOut,

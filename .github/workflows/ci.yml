@@ -6,10 +6,6 @@ on:
   pull_request:
     branches: [main]
 
-defaults:
-  run:
-    working-directory: ./trackflow
-
 jobs:
   check:
     name: Lint & Type Check
@@ -23,12 +19,11 @@ jobs:
         with:
           node-version: 22
           cache: 'npm'
-          cache-dependency-path: ./trackflow/package-lock.json
 
       - run: npm ci
 
       - name: Lint
-        run: npx next lint
+        run: npx eslint .
 
       - name: Type check
         run: npx tsc --noEmit
@@ -45,7 +40,6 @@ jobs:
         with:
           node-version: 22
           cache: 'npm'
-          cache-dependency-path: ./trackflow/package-lock.json
 
       - run: npm ci
 
@@ -64,7 +58,6 @@ jobs:
         with:
           node-version: 22
           cache: 'npm'
-          cache-dependency-path: ./trackflow/package-lock.json
 
       - run: npm ci
 

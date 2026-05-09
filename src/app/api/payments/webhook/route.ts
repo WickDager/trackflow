@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { validateStripeWebhook, validateYooKassaWebhook, validateCryptomusWebhook } from '@/lib/webhook-validator';
-import { getPaymentProvider } from '@/lib/payments';
 
 export async function POST(req: Request) {
   try {
@@ -93,7 +92,7 @@ export async function POST(req: Request) {
 
 async function handleEvent(
   event: { type: string; id: string; data: Record<string, unknown> },
-  provider: string
+  _provider: string
 ) {
   switch (event.type) {
     case 'checkout.session.completed':

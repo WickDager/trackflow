@@ -1,4 +1,5 @@
 import Stripe from 'stripe';
+import crypto from 'crypto';
 
 const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -41,7 +42,6 @@ export function validateCryptomusWebhook(
       return false;
     }
 
-    const crypto = require('crypto');
     const json = Buffer.from(payload).toString('base64');
     const expected = crypto.createHash('md5').update(json + secretKey).digest('hex');
 
@@ -67,7 +67,6 @@ export function validateYooKassaWebhook(
   }
 
   try {
-    const crypto = require('crypto');
     const expected = crypto
       .createHash('sha256')
       .update(payload + secretKey)

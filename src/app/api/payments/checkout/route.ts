@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { getDefaultProvider, getPaymentProvider } from '@/lib/payments';
 import { auth } from '@/auth';
 import { withRateLimit } from '@/lib/with-rate-limit';
-import { PaymentProvider } from '@/types';
+
 
 const bodySchema = z.object({
   priceId: z.string().min(1, 'Price ID is required'),
