@@ -14,7 +14,6 @@ interface MobileNavProps {
     email: string;
     avatarUrl: string | null;
   };
-  onSignOut: () => void;
 }
 
 export function MobileNav({
@@ -22,7 +21,6 @@ export function MobileNav({
   onClose,
   role,
   user,
-  onSignOut,
 }: MobileNavProps) {
   if (!isOpen) return null;
 
@@ -59,10 +57,6 @@ export function MobileNav({
           <Sidebar
             role={role}
             user={user}
-            onSignOut={() => {
-              onSignOut();
-              onClose();
-            }}
             className="border-r-0"
             onItemClick={onClose}
           />

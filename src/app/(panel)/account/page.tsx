@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { AvatarUpload } from "@/components/account/AvatarUpload";
 import { ProfileForm } from "@/components/account/ProfileForm";
@@ -13,7 +13,6 @@ export default function AccountPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const pendingAvatarRef = useRef<string | null>(null);
 
   useEffect(() => {
     async function fetchProfile() {
@@ -40,15 +39,41 @@ export default function AccountPage() {
     void fetchProfile();
   }, []);
 
-  const handleAvatarChange = useCallback((base64: string) => {
-    pendingAvatarRef.current = base64;
-  }, []);
+  const handleAvatarChange = useCallback(async (base64: string) => {
+    // Auto-save avatar immediately when a photo is selected
+    try {
+      const body = {
+        full_name: profile?.full_name ?? "",
+        company: profile?.company ?? "",
+        avatar_url: base64,
+      };
+
+      const res = await fetch("/api/account", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (res.ok) {
+        const result = await res.json();
+        setProfile(result.data);
+        setError(null);
+        await updateSession({
+          full_name: result.data.full_name,
+          avatar_url: result.data.avatar_url,
+        });
+      }
+    } catch {
+      // Silently ignore avatar update errors
+    }
+  }, [profile, updateSession]);
 
   async function handleUpdateProfile(data: ProfileInput): Promise<boolean> {
     try {
       const body: Record<string, string> = { ...data };
-      if (pendingAvatarRef.current) {
-        body.avatar_url = pendingAvatarRef.current;
+      // Include current avatar if one exists
+      if (profile?.avatar_url) {
+        body.avatar_url = profile.avatar_url;
       }
 
       const res = await fetch("/api/account", {
@@ -67,13 +92,11 @@ export default function AccountPage() {
       setProfile(result.data);
       setError(null);
 
-      // Refresh the session so the sidebar/topbar reflect changes
       await updateSession({
         full_name: result.data.full_name,
         avatar_url: result.data.avatar_url,
       });
 
-      pendingAvatarRef.current = null;
       return true;
     } catch (err) {
       const message =

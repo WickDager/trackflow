@@ -10,6 +10,7 @@ import {
   User,
 } from "lucide-react";
 import { cn, getInitials } from "@/lib/utils";
+import { signOutAction } from "@/lib/auth-actions";
 import type { Role } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -41,7 +42,6 @@ interface SidebarProps {
     email: string;
     avatarUrl: string | null;
   };
-  onSignOut: () => void;
   className?: string;
   onItemClick?: () => void;
 }
@@ -49,7 +49,6 @@ interface SidebarProps {
 export function Sidebar({
   role,
   user,
-  onSignOut,
   className,
   onItemClick,
 }: SidebarProps) {
@@ -122,7 +121,7 @@ export function Sidebar({
           <Button
             variant="ghost"
             size="icon"
-            onClick={onSignOut}
+            onClick={() => signOutAction()}
             className="h-8 w-8 text-ink-muted hover:text-ink-primary"
             aria-label="Sign out"
           >

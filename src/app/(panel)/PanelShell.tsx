@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo } from "react";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
 import { MobileNav } from "@/components/layout/MobileNav";
@@ -33,10 +32,6 @@ export function PanelShell({
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const pathname = usePathname();
 
-  const handleSignOut = useCallback(() => {
-    signOut({ redirectTo: "/auth/login" });
-  }, []);
-
   const pageTitle = useMemo(() => {
     return pageTitleMap[pathname] ?? "Trackflow";
   }, [pathname]);
@@ -45,7 +40,7 @@ export function PanelShell({
     <div className="flex h-screen bg-bg-base">
       {/* Desktop Sidebar — floating glass panel */}
       <aside className="hidden w-56 flex-shrink-0 lg:block">
-        <Sidebar role={role} user={user} onSignOut={handleSignOut} />
+        <Sidebar role={role} user={user} />
       </aside>
 
       {/* Main Content */}
@@ -55,7 +50,6 @@ export function PanelShell({
           role={role}
           user={user}
           onMenuClick={() => setMobileNavOpen(true)}
-          onSignOut={handleSignOut}
         />
         <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
           {children}
@@ -68,7 +62,6 @@ export function PanelShell({
         onClose={() => setMobileNavOpen(false)}
         role={role}
         user={user}
-        onSignOut={handleSignOut}
       />
     </div>
   );

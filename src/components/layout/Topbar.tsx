@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getInitials } from "@/lib/utils";
+import { signOutAction } from "@/lib/auth-actions";
 import type { Role } from "@/types";
 
 interface TopbarProps {
@@ -24,14 +25,12 @@ interface TopbarProps {
     avatarUrl: string | null;
   };
   onMenuClick: () => void;
-  onSignOut: () => void;
 }
 
 export function Topbar({
   title,
   user,
   onMenuClick,
-  onSignOut,
 }: TopbarProps) {
   const router = useRouter();
 
@@ -96,7 +95,7 @@ export function Topbar({
               Settings
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onSignOut}>
+            <DropdownMenuItem onClick={() => signOutAction()}>
               <LogOut className="mr-2 h-4 w-4" />
               Sign out
             </DropdownMenuItem>
