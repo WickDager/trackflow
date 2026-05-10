@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Menu, Bell, User, Settings, LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,8 @@ export function Topbar({
   onMenuClick,
   onSignOut,
 }: TopbarProps) {
+  const router = useRouter();
+
   return (
     <header className="flex h-14 items-center justify-between border-b border-bg-border/60 bg-bg-surface/80 backdrop-blur-xl px-4 lg:bg-transparent lg:backdrop-blur-none lg:border-b-0">
       <div className="flex items-center gap-3">
@@ -84,11 +87,11 @@ export function Topbar({
               <p className="text-xs text-ink-muted">{user.email}</p>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/account")}>
               <User className="mr-2 h-4 w-4" />
               Profile
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/account")}>
               <Settings className="mr-2 h-4 w-4" />
               Settings
             </DropdownMenuItem>

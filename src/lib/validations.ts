@@ -27,6 +27,7 @@ export const shipmentSchema = z.object({
 export const profileSchema = z.object({
   full_name: z.string().min(2, 'Full name must be at least 2 characters'),
   company: z.string().optional().or(z.literal('')),
+  avatar_url: z.string().optional().or(z.literal('')),
 });
 
 export const passwordSchema = z.object({

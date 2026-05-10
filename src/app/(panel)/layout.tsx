@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { auth, signOut } from '@/auth';
+import { auth } from '@/auth';
 import { PanelShell } from './PanelShell';
 
 export default async function PanelLayout({
@@ -13,11 +13,6 @@ export default async function PanelLayout({
     redirect('/auth/login');
   }
 
-  const handleSignOut = async () => {
-    'use server';
-    await signOut({ redirectTo: '/auth/login' });
-  };
-
   return (
     <PanelShell
       role={session.user.role}
@@ -26,7 +21,6 @@ export default async function PanelLayout({
         email: session.user.email,
         avatarUrl: session.user.avatar_url,
       }}
-      onSignOut={handleSignOut}
     >
       {children}
     </PanelShell>

@@ -20,10 +20,11 @@ import { Badge } from "@/components/ui/badge";
 
 interface ProfileFormProps {
   profile: Profile | null;
+  userEmail?: string;
   onSubmit: (data: ProfileInput) => Promise<boolean>;
 }
 
-export function ProfileForm({ profile, onSubmit }: ProfileFormProps) {
+export function ProfileForm({ profile, userEmail, onSubmit }: ProfileFormProps) {
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -105,7 +106,7 @@ export function ProfileForm({ profile, onSubmit }: ProfileFormProps) {
             <Label>Email</Label>
             <Input
               disabled
-              value={profile?.id ? "(email from auth)" : ""}
+              value={userEmail ?? ""}
               className="opacity-60"
             />
             <p className="text-xs text-ink-muted">Email cannot be changed</p>

@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { createClient } from "@supabase/supabase-js"
+import { Eye, EyeOff } from "lucide-react"
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
@@ -18,6 +19,7 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const {
     register,
@@ -143,13 +145,28 @@ export default function RegisterPage() {
 
             <div>
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Min. 8 characters"
-                {...register("password")}
-                className={errors.password ? "border-status-red focus-visible:border-status-red focus-visible:ring-status-red/30" : ""}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Min. 8 characters"
+                  {...register("password")}
+                  className={errors.password ? "border-status-red focus-visible:border-status-red focus-visible:ring-status-red/30 pr-10" : "pr-10"}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink-secondary"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  tabIndex={-1}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
               {errors.password && (
                 <p className="text-xs text-status-red mt-1.5">{errors.password.message}</p>
               )}
@@ -157,13 +174,15 @@ export default function RegisterPage() {
 
             <div>
               <Label htmlFor="confirmPassword">Confirm password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="Re-enter password"
-                {...register("confirmPassword")}
-                className={errors.confirmPassword ? "border-status-red focus-visible:border-status-red focus-visible:ring-status-red/30" : ""}
-              />
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Re-enter password"
+                  {...register("confirmPassword")}
+                  className={errors.confirmPassword ? "border-status-red focus-visible:border-status-red focus-visible:ring-status-red/30 pr-10" : "pr-10"}
+                />
+              </div>
               {errors.confirmPassword && (
                 <p className="text-xs text-status-red mt-1.5">{errors.confirmPassword.message}</p>
               )}

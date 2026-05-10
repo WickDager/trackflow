@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { signIn } from "next-auth/react"
+import { Eye, EyeOff } from "lucide-react"
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
@@ -21,6 +22,7 @@ function LoginForm() {
   const callbackUrl = searchParams.get("callbackUrl") || "/app"
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
 
   const {
     register,
@@ -40,6 +42,12 @@ function LoginForm() {
         password: data.password,
         redirect: false,
       })
+
+      if (result?.error === "EmailNotConfirmed") {
+        setError("Your email has not been confirmed yet. Please check your inbox for the confirmation link.")
+        setIsLoading(false)
+        return
+      }
 
       if (result?.error) {
         setError("Invalid email or password.")
@@ -90,14 +98,29 @@ function LoginForm() {
 
             <div>
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                autoComplete="current-password"
-                {...register("password")}
-                className={errors.password ? "border-status-red focus-visible:border-status-red focus-visible:ring-status-red/30" : ""}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  {...register("password")}
+                  className={errors.password ? "border-status-red focus-visible:border-status-red focus-visible:ring-status-red/30 pr-10" : "pr-10"}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink-secondary"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  tabIndex={-1}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
               {errors.password && (
                 <p className="text-xs text-status-red mt-1.5">{errors.password.message}</p>
               )}

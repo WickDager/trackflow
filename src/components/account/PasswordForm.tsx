@@ -17,7 +17,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export function PasswordForm() {
+interface PasswordFormProps {
+  userEmail?: string;
+}
+
+export function PasswordForm({ userEmail }: PasswordFormProps) {
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,10 +44,26 @@ export function PasswordForm() {
     setError(null);
 
     try {
+      if (!userEmail) {
+        setError("Cannot verify identity. Please try signing out and back in.");
+        return;
+      }
+
       const supabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
       );
+
+      // Verify current password
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: userEmail,
+        password: data.current_password,
+      });
+
+      if (signInError) {
+        setError("Current password is incorrect.");
+        return;
+      }
 
       const { error: updateError } = await supabase.auth.updateUser({
         password: data.new_password,

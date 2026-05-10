@@ -1,7 +1,11 @@
-import NextAuth from 'next-auth';
+import NextAuth, { CredentialsSignin } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { createClient } from '@supabase/supabase-js';
 import type { SessionUser, Role } from '@/types';
+
+class EmailNotConfirmed extends CredentialsSignin {
+  static type = 'EmailNotConfirmed';
+}
 
 declare module 'next-auth' {
   interface Session {
@@ -48,7 +52,14 @@ export const {
           password: credentials.password as string,
         });
 
-        if (error || !data.user) {
+        if (error) {
+          if (error.message.toLowerCase().includes('not confirmed')) {
+            throw new EmailNotConfirmed();
+          }
+          return null;
+        }
+
+        if (!data.user) {
           return null;
         }
 
