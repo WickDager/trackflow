@@ -196,58 +196,61 @@ export default function HeroDashboard() {
               <span className="text-[10px] sm:text-xs font-medium text-ink-primary">Recent Shipments</span>
               <span className="text-[9px] sm:text-[10px] text-ink-muted">3 of 142</span>
             </div>
-            <table className="w-full text-[10px] sm:text-xs">
-              <thead>
-                <tr className="border-b border-bg-border/40">
-                  <th className="w-[25%] text-left py-1.5 pl-2 sm:pl-3 pr-1 text-ink-muted font-medium uppercase tracking-wider text-[8px] sm:text-[10px]">
-                    Tracking #
-                  </th>
-                  <th className="w-[25%] text-left py-1.5 px-1 text-ink-muted font-medium uppercase tracking-wider text-[8px] sm:text-[10px]">
-                    Origin
-                  </th>
-                  <th className="w-[25%] text-left py-1.5 px-1 text-ink-muted font-medium uppercase tracking-wider text-[8px] sm:text-[10px]">
-                    Destination
-                  </th>
-                  <th className="w-[25%] text-left py-1.5 pl-1 pr-2 sm:pr-3 text-ink-muted font-medium uppercase tracking-wider text-[8px] sm:text-[10px]">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {shipments.map((s, i) => {
-                  const status = statusConfig[s.status]
-                  return (
-                    <tr
-                      key={s.id}
-                      className="border-b border-bg-border/30 last:border-0 transition-all duration-500"
-                      style={{
-                        opacity: visible ? 1 : 0,
-                        transform: visible ? "translateX(0)" : "translateX(-8px)",
-                        transitionDelay: `${800 + i * 120}ms`,
-                      }}
-                    >
-                      <td className="w-[25%] py-1.5 pl-2 sm:pl-3 pr-1 text-ink-primary font-mono text-[9px] sm:text-[10px] tracking-wide truncate">
-                        {s.id}
-                      </td>
-                      <td className="w-[25%] py-1.5 px-1 text-ink-secondary text-[9px] sm:text-[10px] truncate">{s.origin}</td>
-                      <td className="w-[25%] py-1.5 px-1 text-ink-secondary text-[9px] sm:text-[10px] truncate">{s.dest}</td>
-                      <td className="w-[25%] py-1.5 pl-1 pr-2 sm:pr-3">
+            <div className="text-[10px] sm:text-xs">
+              {/* Header row */}
+              <div className="grid grid-cols-4 border-b border-bg-border/40">
+                <div className="py-1.5 pl-2 sm:pl-3 text-ink-muted font-medium uppercase tracking-wider text-[8px] sm:text-[10px]">
+                  Tracking #
+                </div>
+                <div className="py-1.5 text-ink-muted font-medium uppercase tracking-wider text-[8px] sm:text-[10px]">
+                  Origin
+                </div>
+                <div className="py-1.5 text-ink-muted font-medium uppercase tracking-wider text-[8px] sm:text-[10px]">
+                  Destination
+                </div>
+                <div className="py-1.5 pr-2 sm:pr-3 text-ink-muted font-medium uppercase tracking-wider text-[8px] sm:text-[10px]">
+                  Status
+                </div>
+              </div>
+
+              {/* Data rows */}
+              {shipments.map((s, i) => {
+                const status = statusConfig[s.status]
+                return (
+                  <div
+                    key={s.id}
+                    className="grid grid-cols-4 border-b border-bg-border/30 last:border-0 transition-all duration-500"
+                    style={{
+                      opacity: visible ? 1 : 0,
+                      transform: visible ? "translateX(0)" : "translateX(-8px)",
+                      transitionDelay: `${800 + i * 120}ms`,
+                    }}
+                  >
+                    <div className="py-1.5 pl-2 sm:pl-3 text-ink-primary font-mono text-[9px] sm:text-[10px] tracking-wide truncate">
+                      {s.id}
+                    </div>
+                    <div className="py-1.5 text-ink-secondary text-[9px] sm:text-[10px] truncate">
+                      {s.origin}
+                    </div>
+                    <div className="py-1.5 text-ink-secondary text-[9px] sm:text-[10px] truncate">
+                      {s.dest}
+                    </div>
+                    <div className="py-1.5 pr-2 sm:pr-3">
+                      <span
+                        className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[8px] sm:text-[10px] font-medium whitespace-nowrap ${status.classes}`}
+                      >
                         <span
-                          className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[8px] sm:text-[10px] font-medium whitespace-nowrap ${status.classes}`}
-                        >
-                          <span
-                            className={`inline-block w-1 h-1 rounded-full flex-shrink-0 ${status.dot} ${
-                              s.status === "in_transit" ? "animate-pulse" : ""
-                            }`}
-                          />
-                          {status.label}
-                        </span>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+                          className={`inline-block w-1 h-1 rounded-full flex-shrink-0 ${status.dot} ${
+                            s.status === "in_transit" ? "animate-pulse" : ""
+                          }`}
+                        />
+                        {status.label}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         </div>
       </div>
