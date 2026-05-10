@@ -196,25 +196,19 @@ export default function HeroDashboard() {
               <span className="text-[10px] sm:text-xs font-medium text-ink-primary">Recent Shipments</span>
               <span className="text-[9px] sm:text-[10px] text-ink-muted">3 of 142</span>
             </div>
-            <table className="w-full text-[10px] sm:text-xs table-fixed">
-              <colgroup>
-                <col className="w-[25%]" />
-                <col className="w-[27%]" />
-                <col className="w-[27%]" />
-                <col className="w-[21%]" />
-              </colgroup>
+            <table className="w-full text-[10px] sm:text-xs">
               <thead>
                 <tr className="border-b border-bg-border/40">
-                  <th className="text-left py-1.5 pl-2 sm:pl-3 pr-1 text-ink-muted font-medium uppercase tracking-wider text-[8px] sm:text-[10px]">
+                  <th className="w-[25%] text-left py-1.5 pl-2 sm:pl-3 pr-1 text-ink-muted font-medium uppercase tracking-wider text-[8px] sm:text-[10px]">
                     Tracking #
                   </th>
-                  <th className="text-left py-1.5 px-1 text-ink-muted font-medium uppercase tracking-wider text-[8px] sm:text-[10px]">
+                  <th className="w-[25%] text-left py-1.5 px-1 text-ink-muted font-medium uppercase tracking-wider text-[8px] sm:text-[10px]">
                     Origin
                   </th>
-                  <th className="text-left py-1.5 px-1 text-ink-muted font-medium uppercase tracking-wider text-[8px] sm:text-[10px]">
+                  <th className="w-[25%] text-left py-1.5 px-1 text-ink-muted font-medium uppercase tracking-wider text-[8px] sm:text-[10px]">
                     Destination
                   </th>
-                  <th className="text-left py-1.5 pl-1 pr-2 sm:pr-3 text-ink-muted font-medium uppercase tracking-wider text-[8px] sm:text-[10px]">
+                  <th className="w-[25%] text-left py-1.5 pl-1 pr-2 sm:pr-3 text-ink-muted font-medium uppercase tracking-wider text-[8px] sm:text-[10px]">
                     Status
                   </th>
                 </tr>
@@ -232,12 +226,12 @@ export default function HeroDashboard() {
                         transitionDelay: `${800 + i * 120}ms`,
                       }}
                     >
-                      <td className="py-1.5 pl-2 sm:pl-3 pr-1 text-ink-primary font-mono text-[9px] sm:text-[10px] tracking-wide truncate">
+                      <td className="w-[25%] py-1.5 pl-2 sm:pl-3 pr-1 text-ink-primary font-mono text-[9px] sm:text-[10px] tracking-wide truncate">
                         {s.id}
                       </td>
-                      <td className="py-1.5 px-1 text-ink-secondary text-[9px] sm:text-[10px] truncate">{s.origin}</td>
-                      <td className="py-1.5 px-1 text-ink-secondary text-[9px] sm:text-[10px] truncate">{s.dest}</td>
-                      <td className="py-1.5 pl-1 pr-2 sm:pr-3">
+                      <td className="w-[25%] py-1.5 px-1 text-ink-secondary text-[9px] sm:text-[10px] truncate">{s.origin}</td>
+                      <td className="w-[25%] py-1.5 px-1 text-ink-secondary text-[9px] sm:text-[10px] truncate">{s.dest}</td>
+                      <td className="w-[25%] py-1.5 pl-1 pr-2 sm:pr-3">
                         <span
                           className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[8px] sm:text-[10px] font-medium whitespace-nowrap ${status.classes}`}
                         >
