@@ -48,6 +48,7 @@ export const {
           throw new Error('Supabase configuration is missing');
         }
 
+        // Anon client for auth only (has access to auth schema on server)
         const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -66,7 +67,13 @@ export const {
           return null;
         }
 
-        const { data: profile } = await supabase
+        // Server client (service role) for DB queries — bypasses RLS
+        // Anon client on the server has no session, so RLS policies that
+        // check auth.uid() would see NULL and return no rows.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const db = getServerClient() as any;
+
+        const { data: profile } = await db
           .from('profiles')
           .select('full_name, role, avatar_url, company, organization_id')
           .eq('id', data.user.id)
@@ -79,9 +86,7 @@ export const {
         if (!organization_id) {
           const inviteToken = data.user.user_metadata?.invite_token as string | undefined;
           if (inviteToken) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const serverClient = getServerClient() as any;
-            const { data: invite } = await serverClient
+            const { data: invite } = await db
               .from('invites')
               .select('id, organization_id, uses, max_uses, is_active, expires_at, organizations(subscription_status, subscription_expires_at)')
               .eq('token', inviteToken)
@@ -99,13 +104,13 @@ export const {
                 invite.uses < invite.max_uses &&
                 new Date(invite.expires_at) > new Date()
               ) {
-                await serverClient
+                await db
                   .from('profiles')
                   .update({ organization_id: invite.organization_id })
                   .eq('id', data.user.id);
 
                 const newUses = invite.uses + 1;
-                await serverClient
+                await db
                   .from('invites')
                   .update({
                     uses: newUses,
@@ -120,7 +125,7 @@ export const {
         }
 
         if (organization_id) {
-          const { data: org } = await supabase
+          const { data: org } = await db
             .from('organizations')
             .select('subscription_status')
             .eq('id', organization_id)

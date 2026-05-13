@@ -3,12 +3,6 @@ import { getServerClient } from '@/lib/supabase';
 import { auth } from '@/auth';
 import type { Invite } from '@/types';
 
-const PLAN_MAX_USERS: Record<string, number> = {
-  starter: 3,
-  pro: 10,
-  enterprise: 999,
-};
-
 export async function GET() {
   try {
     const session = await auth();
@@ -71,13 +65,38 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { max_uses } = body;
 
-    const plan = (session.user.subscription_status ?? 'starter') as string;
-    const maxUsers = PLAN_MAX_USERS[plan] ?? 3;
-
-    const inviteMaxUses = max_uses ? Math.min(Number(max_uses), maxUsers) : 1;
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (getServerClient() as any)
+    const db = getServerClient() as any;
+
+    // Fetch org to get max_users and current user count
+    const { data: org } = await db
+      .from('organizations')
+      .select('max_users')
+      .eq('id', orgId)
+      .single();
+
+    const maxAllowed = org?.max_users ?? 3;
+
+    // Count current members in the org
+    const { count: currentCount } = await db
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('organization_id', orgId);
+
+    const remaining = Math.max(maxAllowed - (currentCount ?? 0), 0);
+
+    if (remaining === 0) {
+      return NextResponse.json(
+        { data: null, error: `You've reached your plan's limit of ${maxAllowed} users. Upgrade to add more.` },
+        { status: 400 }
+      );
+    }
+
+    const inviteMaxUses = max_uses
+      ? Math.min(Number(max_uses), remaining)
+      : 1;
+
+    const { data, error } = await db
       .from('invites')
       .insert({
         organization_id: orgId,

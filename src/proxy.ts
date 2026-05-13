@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const protectedRoutes = ['/app', '/account', '/admin', '/billing'];
+const protectedRoutes = ['/app', '/account', '/team', '/admin', '/billing'];
 
 const authRoutes = ['/auth/login', '/auth/register'];
 
@@ -37,6 +37,7 @@ export const config = {
   matcher: [
     '/app/:path*',
     '/account/:path*',
+    '/team/:path*',
     '/admin/:path*',
     '/billing/:path*',
     '/auth/login',

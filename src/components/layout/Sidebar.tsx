@@ -27,6 +27,7 @@ interface NavItem {
 const allNavItems: NavItem[] = [
   { label: "Dashboard", href: "/app", icon: Package },
   { label: "Account", href: "/account", icon: User },
+  { label: "Team", href: "/team", icon: Users, adminOnly: true },
   { label: "Billing", href: "/billing", icon: CreditCard, adminOnly: true },
   { label: "Users", href: "/admin/users", icon: Users, adminOnly: true },
   {

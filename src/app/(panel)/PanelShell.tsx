@@ -10,8 +10,10 @@ import type { Role } from "@/types";
 const pageTitleMap: Record<string, string> = {
   "/app": "Shipments",
   "/account": "Account",
+  "/team": "Team",
   "/admin/users": "User Management",
   "/admin/analytics": "Analytics",
+  "/billing": "Billing",
 };
 
 interface PanelShellProps {
