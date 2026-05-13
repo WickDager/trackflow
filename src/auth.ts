@@ -131,6 +131,37 @@ export const {
             }
           }
 
+          // Trial starter: no invite, no org — create one and make them admin
+          if (!organization_id) {
+            const inviteToken = data.user.user_metadata?.invite_token as string | undefined;
+            if (!inviteToken) {
+              const { data: newOrg } = await db
+                .from('organizations')
+                .insert({
+                  owner_id: data.user.id,
+                  name: data.user.user_metadata?.full_name ?? data.user.email,
+                  plan: 'starter',
+                  subscription_status: 'active',
+                  max_users: 3,
+                })
+                .select()
+                .single();
+
+              if (newOrg) {
+                await db
+                  .from('profiles')
+                  .update({
+                    role: 'admin',
+                    organization_id: newOrg.id,
+                  })
+                  .eq('id', data.user.id);
+
+                role = 'admin';
+                organization_id = newOrg.id;
+              }
+            }
+          }
+
           if (organization_id) {
             const { data: org } = await db
               .from('organizations')
