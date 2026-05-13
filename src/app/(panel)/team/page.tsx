@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 import { Plus, Copy, Check, Trash2, Users, Link2, AlertTriangle } from "lucide-react";
 import type { Invite, Organization, Profile } from "@/types";
 import { getInitials, formatDate } from "@/lib/utils";
@@ -15,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function TeamPage() {
   const { data: session } = useSession();
+  const router = useRouter();
   const [org, setOrg] = useState<Organization | null>(null);
   const [invites, setInvites] = useState<Invite[]>([]);
   const [users, setUsers] = useState<Profile[]>([]);
@@ -25,6 +27,8 @@ export default function TeamPage() {
   const [newInviteLink, setNewInviteLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const [deleteTeamConfirm, setDeleteTeamConfirm] = useState("");
+  const [deletingTeam, setDeletingTeam] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -103,6 +107,25 @@ export default function TeamPage() {
       // silently fail
     } finally {
       setRemovingId(null);
+    }
+  }
+
+  async function handleDeleteTeam() {
+    if (deleteTeamConfirm !== "DELETE") return;
+    setDeletingTeam(true);
+    try {
+      const res = await fetch("/api/organization", { method: "DELETE" });
+      if (!res.ok) {
+        const result = await res.json();
+        setError(result.error ?? "Failed to delete team");
+        setDeletingTeam(false);
+        return;
+      }
+      await signOut({ redirect: false });
+      router.push("/auth/login");
+    } catch {
+      setError("Failed to delete team");
+      setDeletingTeam(false);
     }
   }
 
@@ -335,6 +358,30 @@ export default function TeamPage() {
             })}
           </div>
         )}
+      </div>
+
+      {/* Danger Zone */}
+      <div className="rounded-2xl border border-status-red/20 bg-status-red-bg/30 p-6">
+        <h3 className="text-sm font-semibold text-status-red">Delete Team</h3>
+        <p className="mt-1 text-sm text-ink-secondary">
+          Permanently delete your entire team and all associated data. All members will be removed from the organization. This action cannot be undone.
+        </p>
+        <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <input
+            type="text"
+            placeholder='Type "DELETE" to confirm'
+            value={deleteTeamConfirm}
+            onChange={(e) => setDeleteTeamConfirm(e.target.value)}
+            className="rounded-lg border border-bg-border/60 bg-bg-base px-3 py-2 text-sm text-ink-primary placeholder:text-ink-muted w-64"
+          />
+          <Button
+            variant="destructive"
+            disabled={deleteTeamConfirm !== "DELETE" || deletingTeam}
+            onClick={handleDeleteTeam}
+          >
+            {deletingTeam ? "Deleting..." : "Delete Team"}
+          </Button>
+        </div>
       </div>
     </div>
   );

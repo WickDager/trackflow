@@ -2,17 +2,23 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 import { AvatarUpload } from "@/components/account/AvatarUpload";
 import { ProfileForm } from "@/components/account/ProfileForm";
 import { PasswordForm } from "@/components/account/PasswordForm";
+import { Button } from "@/components/ui/button";
 import type { Profile } from "@/types";
 import type { ProfileInput } from "@/lib/validations";
 
 export default function AccountPage() {
   const { data: session, update: updateSession } = useSession();
+  const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     async function fetchProfile() {
@@ -106,6 +112,25 @@ export default function AccountPage() {
     }
   }
 
+  async function handleDeleteAccount() {
+    if (deleteConfirm !== "DELETE") return;
+    setDeleting(true);
+    try {
+      const res = await fetch("/api/account", { method: "DELETE" });
+      if (!res.ok) {
+        const result = await res.json();
+        setError(result.error ?? "Failed to delete account");
+        setDeleting(false);
+        return;
+      }
+      await signOut({ redirect: false });
+      router.push("/auth/login");
+    } catch {
+      setError("Failed to delete account");
+      setDeleting(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -139,6 +164,30 @@ export default function AccountPage() {
 
       {/* Password Section */}
       <PasswordForm userEmail={session?.user?.email} />
+
+      {/* Danger Zone */}
+      <div className="rounded-2xl border border-status-red/20 bg-status-red-bg/30 p-6">
+        <h3 className="text-sm font-semibold text-status-red">Danger Zone</h3>
+        <p className="mt-1 text-sm text-ink-secondary">
+          Permanently delete your account and all associated data. This action cannot be undone.
+        </p>
+        <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <input
+            type="text"
+            placeholder='Type "DELETE" to confirm'
+            value={deleteConfirm}
+            onChange={(e) => setDeleteConfirm(e.target.value)}
+            className="rounded-lg border border-bg-border/60 bg-bg-base px-3 py-2 text-sm text-ink-primary placeholder:text-ink-muted w-64"
+          />
+          <Button
+            variant="destructive"
+            disabled={deleteConfirm !== "DELETE" || deleting}
+            onClick={handleDeleteAccount}
+          >
+            {deleting ? "Deleting..." : "Delete Account"}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
