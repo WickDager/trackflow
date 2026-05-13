@@ -67,79 +67,89 @@ export const {
           return null;
         }
 
-        // Server client (service role) for DB queries — bypasses RLS
-        // Anon client on the server has no session, so RLS policies that
-        // check auth.uid() would see NULL and return no rows.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const db = getServerClient() as any;
-
-        const { data: profile } = await db
-          .from('profiles')
-          .select('full_name, role, avatar_url, company, organization_id')
-          .eq('id', data.user.id)
-          .single();
-
-        let organization_id = profile?.organization_id ?? null;
+        let role: Role = 'user';
+        let full_name: string | null = null;
+        let avatar_url: string | null = null;
+        let organization_id: string | null = null;
         let subscription_status: SubscriptionStatus | null = null;
 
-        // Auto-claim invite if user has invite_token in metadata and no org yet
-        if (!organization_id) {
-          const inviteToken = data.user.user_metadata?.invite_token as string | undefined;
-          if (inviteToken) {
-            const { data: invite } = await db
-              .from('invites')
-              .select('id, organization_id, uses, max_uses, is_active, expires_at, organizations(subscription_status, subscription_expires_at)')
-              .eq('token', inviteToken)
-              .eq('is_active', true)
-              .single();
+        try {
+          // Server client (service role) for DB queries — bypasses RLS
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const db = getServerClient() as any;
 
-            if (invite) {
-              const org = invite.organizations as unknown as {
-                subscription_status: string;
-                subscription_expires_at: string | null;
-              } | null;
+          const { data: profile } = await db
+            .from('profiles')
+            .select('full_name, role, avatar_url, company, organization_id')
+            .eq('id', data.user.id)
+            .single();
 
-              if (
-                org?.subscription_status !== 'expired' &&
-                invite.uses < invite.max_uses &&
-                new Date(invite.expires_at) > new Date()
-              ) {
-                await db
-                  .from('profiles')
-                  .update({ organization_id: invite.organization_id })
-                  .eq('id', data.user.id);
+          role = (profile?.role ?? 'user') as Role;
+          full_name = profile?.full_name ?? null;
+          avatar_url = profile?.avatar_url ?? null;
+          organization_id = profile?.organization_id ?? null;
 
-                const newUses = invite.uses + 1;
-                await db
-                  .from('invites')
-                  .update({
-                    uses: newUses,
-                    ...(newUses >= invite.max_uses ? { is_active: false } : {}),
-                  })
-                  .eq('id', invite.id);
+          // Auto-claim invite if user has invite_token in metadata and no org yet
+          if (!organization_id) {
+            const inviteToken = data.user.user_metadata?.invite_token as string | undefined;
+            if (inviteToken) {
+              const { data: invite } = await db
+                .from('invites')
+                .select('id, organization_id, uses, max_uses, is_active, expires_at, organizations(subscription_status, subscription_expires_at)')
+                .eq('token', inviteToken)
+                .eq('is_active', true)
+                .single();
 
-                organization_id = invite.organization_id;
+              if (invite) {
+                const org = invite.organizations as unknown as {
+                  subscription_status: string;
+                  subscription_expires_at: string | null;
+                } | null;
+
+                if (
+                  org?.subscription_status !== 'expired' &&
+                  invite.uses < invite.max_uses &&
+                  new Date(invite.expires_at) > new Date()
+                ) {
+                  await db
+                    .from('profiles')
+                    .update({ organization_id: invite.organization_id })
+                    .eq('id', data.user.id);
+
+                  const newUses = invite.uses + 1;
+                  await db
+                    .from('invites')
+                    .update({
+                      uses: newUses,
+                      ...(newUses >= invite.max_uses ? { is_active: false } : {}),
+                    })
+                    .eq('id', invite.id);
+
+                  organization_id = invite.organization_id;
+                }
               }
             }
           }
-        }
 
-        if (organization_id) {
-          const { data: org } = await db
-            .from('organizations')
-            .select('subscription_status')
-            .eq('id', organization_id)
-            .single();
+          if (organization_id) {
+            const { data: org } = await db
+              .from('organizations')
+              .select('subscription_status')
+              .eq('id', organization_id)
+              .single();
 
-          subscription_status = org?.subscription_status ?? null;
+            subscription_status = org?.subscription_status ?? null;
+          }
+        } catch (dbError) {
+          console.error('[auth] DB query failed, falling back to anon client:', dbError);
         }
 
         return {
           id: data.user.id,
           email: data.user.email!,
-          role: (profile?.role ?? 'user') as Role,
-          full_name: profile?.full_name ?? null,
-          avatar_url: profile?.avatar_url ?? null,
+          role,
+          full_name,
+          avatar_url,
           organization_id,
           subscription_status,
         };
