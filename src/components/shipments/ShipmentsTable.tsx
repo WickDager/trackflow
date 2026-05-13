@@ -35,7 +35,7 @@ interface ShipmentsTableProps {
   onUpdate: (id: string, data: Partial<Shipment>) => Promise<boolean>;
   onDelete: (id: string) => Promise<boolean>;
   onCreate: (
-    data: Omit<Shipment, "id" | "created_by" | "created_at" | "updated_at">
+    data: Omit<Shipment, "id" | "created_by" | "created_at" | "updated_at" | "organization_id">
   ) => Promise<boolean>;
 }
 

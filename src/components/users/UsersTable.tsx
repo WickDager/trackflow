@@ -10,7 +10,7 @@ import {
   type ColumnDef,
 } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
-import type { Profile, Role } from "@/types";
+import type { Profile } from "@/types";
 import { formatDate, getInitials } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -38,7 +38,6 @@ interface UsersTableProps {
   loading: boolean;
   error: string | null;
   currentUserId: string;
-  onRoleChange: (userId: string, newRole: Role) => Promise<boolean>;
   onRemove: (userId: string) => Promise<void>;
 }
 
@@ -47,7 +46,6 @@ export function UsersTable({
   loading,
   error,
   currentUserId,
-  onRoleChange,
   onRemove,
 }: UsersTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -95,7 +93,7 @@ export function UsersTable({
         </span>
       ),
       cell: ({ row }) => {
-        const role = row.getValue("role") as Role;
+        const role = row.getValue("role") as string;
         return (
           <Badge
             variant={role === "admin" ? "default" : "secondary"}
@@ -170,18 +168,6 @@ export function UsersTable({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={async () => {
-                  const newRole: Role =
-                    user.role === "admin" ? "user" : "admin";
-                  if (confirm(`Change role to ${newRole}?`)) {
-                    await onRoleChange(user.id, newRole);
-                  }
-                }}
-              >
-                Change role to {user.role === "admin" ? "user" : "admin"}
-              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="text-status-red"

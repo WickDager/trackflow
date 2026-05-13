@@ -8,6 +8,7 @@ import {
   BarChart3,
   LogOut,
   User,
+  CreditCard,
 } from "lucide-react";
 import { cn, getInitials } from "@/lib/utils";
 import { signOutAction } from "@/lib/auth-actions";
@@ -26,6 +27,7 @@ interface NavItem {
 const allNavItems: NavItem[] = [
   { label: "Dashboard", href: "/app", icon: Package },
   { label: "Account", href: "/account", icon: User },
+  { label: "Billing", href: "/billing", icon: CreditCard, adminOnly: true },
   { label: "Users", href: "/admin/users", icon: Users, adminOnly: true },
   {
     label: "Analytics",

@@ -7,7 +7,6 @@ import { UsersTable } from "@/components/users/UsersTable";
 import { InviteUserForm } from "@/components/users/InviteUserForm";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import type { Role } from "@/types";
 
 export default function UsersPage() {
   const { data: session } = useSession();
@@ -17,13 +16,15 @@ export default function UsersPage() {
   const adminCount = users.filter((u) => u.role === "admin").length;
   const userCount = users.filter((u) => u.role === "user").length;
 
-  async function handleRoleChange(_userId: string, _newRole: Role): Promise<boolean> {
-    await refetch();
-    return true;
-  }
-
-  async function handleRemove(_userId: string): Promise<void> {
-    await refetch();
+  async function handleRemove(userId: string): Promise<void> {
+    try {
+      const res = await fetch(`/api/users/${userId}`, { method: "DELETE" });
+      if (res.ok) {
+        await refetch();
+      }
+    } catch {
+      // Silently fail
+    }
   }
 
   return (
@@ -35,7 +36,7 @@ export default function UsersPage() {
         </p>
         <Button onClick={() => setInviteOpen(true)} size="sm">
           <Plus className="mr-1 h-4 w-4" />
-          Invite user
+          Create invite link
         </Button>
       </div>
 
@@ -44,7 +45,6 @@ export default function UsersPage() {
         loading={loading}
         error={error}
         currentUserId={session?.user?.id ?? ""}
-        onRoleChange={handleRoleChange}
         onRemove={handleRemove}
       />
 

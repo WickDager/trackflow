@@ -1,7 +1,8 @@
 import NextAuth, { CredentialsSignin } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { createClient } from '@supabase/supabase-js';
-import type { SessionUser, Role } from '@/types';
+import { getServerClient } from '@/lib/supabase';
+import type { SessionUser, Role, SubscriptionStatus } from '@/types';
 
 class EmailNotConfirmed extends CredentialsSignin {
   static type = 'EmailNotConfirmed';
@@ -17,6 +18,8 @@ declare module 'next-auth' {
     role: Role;
     full_name: string | null;
     avatar_url: string | null;
+    organization_id: string | null;
+    subscription_status: SubscriptionStatus | null;
   }
 }
 
@@ -65,9 +68,66 @@ export const {
 
         const { data: profile } = await supabase
           .from('profiles')
-          .select('full_name, role, avatar_url, company')
+          .select('full_name, role, avatar_url, company, organization_id')
           .eq('id', data.user.id)
           .single();
+
+        let organization_id = profile?.organization_id ?? null;
+        let subscription_status: SubscriptionStatus | null = null;
+
+        // Auto-claim invite if user has invite_token in metadata and no org yet
+        if (!organization_id) {
+          const inviteToken = data.user.user_metadata?.invite_token as string | undefined;
+          if (inviteToken) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const serverClient = getServerClient() as any;
+            const { data: invite } = await serverClient
+              .from('invites')
+              .select('id, organization_id, uses, max_uses, is_active, expires_at, organizations(subscription_status, subscription_expires_at)')
+              .eq('token', inviteToken)
+              .eq('is_active', true)
+              .single();
+
+            if (invite) {
+              const org = invite.organizations as unknown as {
+                subscription_status: string;
+                subscription_expires_at: string | null;
+              } | null;
+
+              if (
+                org?.subscription_status !== 'expired' &&
+                invite.uses < invite.max_uses &&
+                new Date(invite.expires_at) > new Date()
+              ) {
+                await serverClient
+                  .from('profiles')
+                  .update({ organization_id: invite.organization_id })
+                  .eq('id', data.user.id);
+
+                const newUses = invite.uses + 1;
+                await serverClient
+                  .from('invites')
+                  .update({
+                    uses: newUses,
+                    ...(newUses >= invite.max_uses ? { is_active: false } : {}),
+                  })
+                  .eq('id', invite.id);
+
+                organization_id = invite.organization_id;
+              }
+            }
+          }
+        }
+
+        if (organization_id) {
+          const { data: org } = await supabase
+            .from('organizations')
+            .select('subscription_status')
+            .eq('id', organization_id)
+            .single();
+
+          subscription_status = org?.subscription_status ?? null;
+        }
 
         return {
           id: data.user.id,
@@ -75,6 +135,8 @@ export const {
           role: (profile?.role ?? 'user') as Role,
           full_name: profile?.full_name ?? null,
           avatar_url: profile?.avatar_url ?? null,
+          organization_id,
+          subscription_status,
         };
       },
     }),
@@ -90,6 +152,8 @@ export const {
         token.role = user.role;
         token.full_name = user.full_name;
         token.avatar_url = user.avatar_url;
+        token.organization_id = user.organization_id;
+        token.subscription_status = user.subscription_status;
       }
       if (trigger === 'update' && session) {
         token.full_name = session.full_name;
@@ -105,6 +169,8 @@ export const {
         session.user.role = token.role as Role;
         session.user.full_name = token.full_name as string | null;
         session.user.avatar_url = token.avatar_url as string | null;
+        session.user.organization_id = token.organization_id as string | null;
+        session.user.subscription_status = token.subscription_status as SubscriptionStatus | null;
       }
       return session;
     },

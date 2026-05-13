@@ -14,7 +14,7 @@ const features = [
   {
     icon: Plug,
     title: "CRM integrations",
-    description: "Connect with Bitrix24, amoCRM, and 1C out of the box. More integrations coming.",
+    description: "Bitrix24 & amoCRM integration out of the box plus 1C for enterprise customers. — coming soon. ",
   },
 ]
 

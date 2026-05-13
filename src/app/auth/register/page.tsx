@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { createClient } from "@supabase/supabase-js"
+import { useSearchParams } from "next/navigation"
 import { Eye, EyeOff } from "lucide-react"
 import Link from "next/link"
 
@@ -15,11 +16,16 @@ import { registerSchema } from "@/lib/validations"
 
 type RegisterFormValues = z.infer<typeof registerSchema>
 
-export default function RegisterPage() {
+function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [inviteValid, setInviteValid] = useState<boolean | null>(null)
+  const [inviteChecking, setInviteChecking] = useState(false)
+
+  const searchParams = useSearchParams()
+  const inviteToken = searchParams.get("invite")
 
   const {
     register,
@@ -28,6 +34,28 @@ export default function RegisterPage() {
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
   })
+
+  useEffect(() => {
+    if (!inviteToken) {
+      setInviteValid(null)
+      return
+    }
+
+    setInviteChecking(true)
+    fetch(`/api/invites/validate?token=${encodeURIComponent(inviteToken)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setInviteValid(data.valid)
+        if (!data.valid) {
+          setError(data.error ?? "Invalid invite link")
+        }
+      })
+      .catch(() => {
+        setInviteValid(false)
+        setError("Failed to verify invite link")
+      })
+      .finally(() => setInviteChecking(false))
+  }, [inviteToken])
 
   const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true)
@@ -51,6 +79,7 @@ export default function RegisterPage() {
         options: {
           data: {
             full_name: data.name,
+            ...(inviteToken ? { invite_token: inviteToken } : {}),
           },
         },
       })
@@ -61,8 +90,8 @@ export default function RegisterPage() {
         return
       }
 
-      setIsLoading(false)
       setSuccess(true)
+      setIsLoading(false)
     } catch {
       setError("Something went wrong. Please try again.")
       setIsLoading(false)
@@ -86,11 +115,22 @@ export default function RegisterPage() {
             <h2 className="text-xl font-semibold text-ink-primary mb-2">Account created</h2>
             <p className="text-sm text-ink-secondary mb-6">
               Check your email for a confirmation link to complete your registration.
+              {inviteToken && " Once confirmed, you'll be added to the organization."}
             </p>
             <Link href="/auth/login">
               <Button className="w-full">Sign in</Button>
             </Link>
           </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (inviteChecking) {
+    return (
+      <div className="min-h-screen bg-bg-base flex items-center justify-center px-4 py-8">
+        <div className="w-full max-w-md text-center">
+          <p className="text-ink-secondary">Verifying invite link...</p>
         </div>
       </div>
     )
@@ -105,12 +145,24 @@ export default function RegisterPage() {
             <span className="text-lg font-semibold text-ink-primary tracking-tight">Trackflow</span>
           </div>
 
-          <h2 className="text-xl font-semibold text-ink-primary mb-1 text-center">Create account</h2>
-          <p className="text-sm text-ink-secondary mb-6 text-center">Start your 14-day free trial</p>
+          <h2 className="text-xl font-semibold text-ink-primary mb-1 text-center">
+            {inviteToken && inviteValid ? "Accept invitation" : "Create account"}
+          </h2>
+          <p className="text-sm text-ink-secondary mb-6 text-center">
+            {inviteToken && inviteValid
+              ? "You've been invited to join an organization"
+              : "Start your 14-day free trial"}
+          </p>
 
           {error && (
             <div className="p-3 bg-status-red-bg border border-status-red/20 rounded-lg text-xs text-status-red mb-4">
               {error}
+            </div>
+          )}
+
+          {inviteToken && !inviteValid && !error && (
+            <div className="p-3 bg-status-red-bg border border-status-red/20 rounded-lg text-xs text-status-red mb-4">
+              This invite link is invalid or has expired. Please ask your admin for a new link.
             </div>
           )}
 
@@ -188,7 +240,11 @@ export default function RegisterPage() {
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading || (!!inviteToken && inviteValid === false)}
+            >
               {isLoading ? "Creating account..." : "Create account"}
             </Button>
           </form>
@@ -202,5 +258,21 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-bg-base flex items-center justify-center px-4 py-8">
+          <div className="w-full max-w-md text-center">
+            <p className="text-ink-secondary">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <RegisterForm />
+    </Suspense>
   )
 }

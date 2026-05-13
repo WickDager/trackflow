@@ -39,14 +39,8 @@ export const passwordSchema = z.object({
   path: ['confirm_password'],
 });
 
-export const inviteUserSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  role: z.enum(['admin', 'user']),
-});
-
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type ShipmentInput = z.infer<typeof shipmentSchema>;
 export type ProfileInput = z.infer<typeof profileSchema>;
 export type PasswordInput = z.infer<typeof passwordSchema>;
-export type InviteUserInput = z.infer<typeof inviteUserSchema>;

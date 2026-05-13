@@ -14,8 +14,8 @@ function About() {
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
           <div>
-            <div className="text-3xl sm:text-4xl font-bold text-accent tracking-tight">50+</div>
-            <div className="text-xs sm:text-sm text-ink-muted mt-2">Carrier integrations</div>
+            <div className="text-3xl sm:text-4xl font-bold text-accent tracking-tight">3</div>
+            <div className="text-xs sm:text-sm text-ink-muted mt-2">CRM integrations</div>
           </div>
           <div>
             <div className="text-3xl sm:text-4xl font-bold text-accent tracking-tight">10K+</div>

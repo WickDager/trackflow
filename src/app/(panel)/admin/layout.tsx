@@ -16,5 +16,9 @@ export default async function AdminLayout({
     redirect('/app');
   }
 
+  if (session.user.subscription_status === 'expired') {
+    redirect('/billing');
+  }
+
   return <>{children}</>;
 }

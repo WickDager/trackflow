@@ -14,7 +14,7 @@ interface UseShipmentsReturn {
   error: string | null;
   totalCount: number;
   refetch: () => Promise<void>;
-  createShipment: (data: Omit<Shipment, 'id' | 'created_by' | 'created_at' | 'updated_at'>) => Promise<boolean>;
+  createShipment: (data: Omit<Shipment, 'id' | 'created_by' | 'created_at' | 'updated_at' | 'organization_id'>) => Promise<boolean>;
   updateShipment: (id: string, data: Partial<Shipment>) => Promise<boolean>;
   deleteShipment: (id: string) => Promise<boolean>;
 }
@@ -88,7 +88,7 @@ export function useShipments(params: UseShipmentsParams = {}): UseShipmentsRetur
   }, [fetchShipments]);
 
   const createShipment = useCallback(
-    async (data: Omit<Shipment, 'id' | 'created_by' | 'created_at' | 'updated_at'>): Promise<boolean> => {
+    async (data: Omit<Shipment, 'id' | 'created_by' | 'created_at' | 'updated_at' | 'organization_id'>): Promise<boolean> => {
       try {
         const response = await fetch('/api/shipments', {
           method: 'POST',

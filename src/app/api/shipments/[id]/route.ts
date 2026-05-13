@@ -14,6 +14,10 @@ export async function PATCH(
       return NextResponse.json({ data: null, error: 'Unauthorized' }, { status: 401 });
     }
 
+    if (session.user.role !== 'admin') {
+      return NextResponse.json({ data: null, error: 'Forbidden' }, { status: 403 });
+    }
+
     const { id } = await params;
     const body = await request.json();
     const validation = shipmentSchema.partial().safeParse(body);

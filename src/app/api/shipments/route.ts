@@ -17,7 +17,16 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') ?? '1', 10);
     const limit = parseInt(searchParams.get('limit') ?? '20', 10);
 
+    const orgId = session.user.organization_id;
+
     let query = getServerClient().from('shipments').select('*', { count: 'exact' });
+
+    if (orgId) {
+      query = query.eq('organization_id', orgId);
+    } else {
+      // No org — only show shipments they created
+      query = query.eq('created_by', session.user.id);
+    }
 
     if (status && status !== 'all') {
       query = query.eq('status', status);
@@ -67,10 +76,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const payload = {
+      ...validation.data,
+      created_by: session.user.id,
+      organization_id: session.user.organization_id,
+    };
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (getServerClient() as any)
       .from('shipments')
-      .insert(validation.data)
+      .insert(payload)
       .select()
       .single();
 

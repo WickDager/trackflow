@@ -1,5 +1,7 @@
 export type ShipmentStatus = 'pending' | 'in_transit' | 'delivered' | 'failed';
 export type Role = 'admin' | 'user';
+export type Plan = 'starter' | 'pro' | 'enterprise';
+export type SubscriptionStatus = 'active' | 'past_due' | 'canceled' | 'expired';
 
 export interface ApiResponse<T> {
   data: T | null;
@@ -15,6 +17,7 @@ export interface Shipment {
   destination: string;
   status: ShipmentStatus;
   created_by: string | null;
+  organization_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -25,7 +28,32 @@ export interface Profile {
   role: Role;
   avatar_url: string | null;
   company: string | null;
+  organization_id: string | null;
   updated_at: string;
+}
+
+export interface Organization {
+  id: string;
+  name: string;
+  owner_id: string;
+  plan: Plan;
+  subscription_status: SubscriptionStatus;
+  subscription_expires_at: string | null;
+  max_users: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Invite {
+  id: string;
+  organization_id: string;
+  token: string;
+  created_by: string;
+  max_uses: number;
+  uses: number;
+  expires_at: string;
+  created_at: string;
+  is_active: boolean;
 }
 
 export interface PaginatedResponse<T> {
@@ -40,6 +68,8 @@ export interface SessionUser {
   role: Role;
   full_name: string | null;
   avatar_url: string | null;
+  organization_id: string | null;
+  subscription_status: SubscriptionStatus | null;
 }
 
 export interface ExtendedSession {
@@ -89,7 +119,6 @@ export interface TelegramUpdate {
 }
 
 export type PaymentProvider = 'stripe' | 'yookassa' | 'cryptomus';
-export type Plan = 'starter' | 'pro' | 'enterprise';
 
 export interface CheckoutParams {
   priceId: string;
@@ -115,6 +144,7 @@ export interface PlanConfig {
   name: string;
   price: string;
   features: string[];
+  maxUsers: number;
   isCurrentPlan?: boolean;
   priceIds: Record<PaymentProvider, string>;
 }
