@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Check, AlertTriangle } from "lucide-react";
-import type { Organization, PlanConfig } from "@/types";
+import type { Organization } from "@/types";
 import { getAllPlans } from "@/lib/plans";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

@@ -1,4 +1,4 @@
-import type { Plan, PlanConfig, PaymentProvider } from '@/types';
+import type { Plan, PlanConfig } from '@/types';
 
 const plans: Record<Plan, Omit<PlanConfig, 'isCurrentPlan'>> = {
   starter: {
@@ -66,7 +66,7 @@ export function getPlanConfig(plan: Plan): PlanConfig {
 }
 
 export function getAllPlans(): PlanConfig[] {
-  return Object.entries(plans).map(([key, config]) => ({
+  return Object.entries(plans).map(([_key, config]) => ({
     ...config,
     isCurrentPlan: false,
   }));
